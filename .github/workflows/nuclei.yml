@@ -24,7 +24,7 @@ jobs:
       - name: Run Nuclei Recon
         run: |
           source $GITHUB_ENV
-          subfinder -d transip.co.uk -all -recursive -silent | tee subs.txt
+          subfinder -d monzo.com -all -recursive -silent | tee subs.txt
 
           # Probe live hosts
           cat subs.txt | httpx -silent -follow-redirects | tee alive.txt
