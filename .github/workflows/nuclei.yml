@@ -34,7 +34,7 @@ jobs:
                  -severity critical,high,medium \
                  -o nuclei_results.txt \
                  -c 50 -rl 300 -retries 5  \
-                 -mhe 50 -fr -fhr -bs 50 \
+                 -mhe 50  -fh -bs 50 \
                  -stats \
 
       - name: Show Nuclei Results
