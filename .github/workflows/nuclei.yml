@@ -24,7 +24,7 @@ jobs:
       - name: Run Nuclei Recon
         run: |
           source $GITHUB_ENV
-          subfinder -d alwaysdata.com -all -recursive -silent | tee subs.txt
+          subfinder -d sysaidit.com -all -recursive -silent | tee subs.txt
 
           # Probe live hosts
           cat subs.txt | httpx -silent -follow-redirects | tee alive.txt
@@ -34,6 +34,7 @@ jobs:
                  -severity critical,high,medium \
                  -o nuclei_results.txt \
                  -c 50 -rl 300 -retries 5  \
+                 -mhe 50 -fr -fhr -bs 50 \
                  -stats \
 
       - name: Show Nuclei Results
