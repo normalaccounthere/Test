@@ -24,7 +24,7 @@ jobs:
       - name: Run Nuclei Recon
         run: |
           source $GITHUB_ENV
-          subfinder -d jedox.com -all -recursive -silent | tee subs.txt
+          subfinder -d palantir.com -all -recursive -silent | tee subs.txt
 
           # Probe live hosts
           cat subs.txt | httpx -silent -follow-redirects | tee alive.txt
@@ -34,7 +34,7 @@ jobs:
                  -severity critical,high,medium \
                  -o nuclei_results.txt \
                  -c 50 -rl 300 -retries 5  \
-                 -mhe 50  -fhr -bs 50 \
+                 -mhe 50 -bs 50 \
                  -stats \
 
       - name: Show Nuclei Results
