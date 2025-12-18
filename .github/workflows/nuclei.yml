@@ -24,7 +24,7 @@ jobs:
       - name: Run Nuclei Recon
         run: |
           source $GITHUB_ENV
-          subfinder -d hostgator.in -all -recursive -silent | tee subs.txt
+          subfinder -d bmc.nl -all -recursive -silent | tee subs.txt
 
           # Probe live hosts
           cat subs.txt | httpx -silent -follow-redirects | tee alive.txt
