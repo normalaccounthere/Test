@@ -8,35 +8,58 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install Chromium
-        run: sudo apt install -y chromium
-
-      - name: Setup Go & Dependencies
+      - name: Install system dependencies
         run: |
           sudo apt update
-          sudo apt install -y golang
-          pip3 install uro
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-          go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
-          go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
-          go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+          sudo apt install -y chromium golang jq python3-pip
 
-      - name: Run Nuclei Recon
+      - name: Setup Go tools
         run: |
-          source $GITHUB_ENV
-          subfinder -d viator.com -all -recursive -silent | tee subs.txt
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
-          # Probe live hosts
-          cat subs.txt | httpx -silent -follow-redirects | tee alive.txt
-          
-          # Run nuclei on live hosts
+          # ProjectDiscovery tools
+          go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+          go install github.com/projectdiscovery/httpx/cmd/httpx@latest
+          go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+
+          # Recon tools
+          go install github.com/tomnomnom/assetfinder@latest
+          CGO_ENABLED=0 go install -v github.com/owasp-amass/amass/v5/cmd/amass@main
+
+          # URL normalization
+          pip3 install uro
+
+      - name: Subdomain Enumeration
+        run: |
+          DOMAIN=eero.com
+
+          echo "[+] Running subfinder"
+          subfinder -d $DOMAIN -all -recursive -silent > subs_subfinder.txt
+
+          echo "[+] Running assetfinder"
+          assetfinder --subs-only $DOMAIN > subs_assetfinder.txt
+
+          echo "[+] Running amass (passive)"
+          amass enum -passive -d $DOMAIN > subs_amass.txt
+
+          echo "[+] Merging & deduplicating"
+          cat subs_*.txt | sort -u > subs.txt
+
+      - name: Probe live hosts
+        run: |
+          cat subs.txt | httpx -silent -follow-redirects > alive.txt
+
+      - name: Run Nuclei
+        run: |
           nuclei -l alive.txt \
-                 -severity critical,high,medium \
-                 -o nuclei_results.txt \
-                 -c 50 -rl 300 -retries 5  \
-                 -mhe 50 -bs 50 \
-                 -stats \
+            -severity critical,high,medium \
+            -o nuclei_results.txt \
+            -c 50 -rl 300 -retries 5 \
+            -mhe 50 -bs 50 \
+            -stats
 
       - name: Show Nuclei Results
         if: always()
-        run: cat nuclei_results.txt
+        run: |
+          echo "========== NUCLEI RESULTS =========="
+          cat nuclei_results.txt || echo "No findings"
