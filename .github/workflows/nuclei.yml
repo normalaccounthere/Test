@@ -21,10 +21,8 @@ jobs:
           go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
           go install github.com/projectdiscovery/httpx/cmd/httpx@latest
           go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
-
-          # Recon tools
           go install github.com/tomnomnom/assetfinder@latest
-          CGO_ENABLED=0 go install -v github.com/owasp-amass/amass/v5/cmd/amass@main
+          
 
           # URL normalization
           pip3 install uro
@@ -38,9 +36,6 @@ jobs:
 
           echo "[+] Running assetfinder"
           assetfinder --subs-only $DOMAIN > subs_assetfinder.txt
-
-          echo "[+] Running amass (passive)"
-          amass enum -passive -d $DOMAIN > subs_amass.txt
 
           echo "[+] Merging & deduplicating"
           cat subs_*.txt | sort -u > subs.txt
