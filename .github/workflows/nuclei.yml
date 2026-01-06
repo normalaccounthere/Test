@@ -29,7 +29,7 @@ jobs:
 
       - name: Subdomain Enumeration
         run: |
-          DOMAIN=acbpost.be
+          DOMAIN=vintedgo.com
 
           echo "[+] Running subfinder"
           subfinder -d $DOMAIN -all -recursive -silent > subs_subfinder.txt
