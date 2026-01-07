@@ -29,7 +29,7 @@ jobs:
 
       - name: Subdomain Enumeration
         run: |
-          DOMAIN=sony.co.in
+          DOMAIN=nic.gea
 
           echo "[+] Running subfinder"
           subfinder -d $DOMAIN -all -recursive -silent > subs_subfinder.txt
