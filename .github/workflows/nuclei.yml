@@ -29,7 +29,7 @@ jobs:
 
       - name: Subdomain Enumeration
         run: |
-          DOMAIN=rhinternal.net
+          DOMAIN=robinhood.net
 
           echo "[+] Running subfinder"
           subfinder -d $DOMAIN -all -recursive -silent > subs_subfinder.txt
