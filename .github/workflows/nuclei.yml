@@ -29,7 +29,7 @@ jobs:
 
       - name: Subdomain Enumeration
         run: |
-          DOMAIN=swisscom.ch
+          DOMAIN=moveworks.io
 
           echo "[+] Running subfinder"
           subfinder -d $DOMAIN -all -recursive -silent > subs_subfinder.txt
