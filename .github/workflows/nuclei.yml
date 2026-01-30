@@ -29,8 +29,8 @@ jobs:
 
       - name: Subdomain Enumeration
         run: |
-          DOMAIN=sprinklr.com
-
+          DOMAIN=earnest.com
+          
           echo "[+] Running subfinder"
           subfinder -d $DOMAIN -all -recursive -silent > subs_subfinder.txt
 
