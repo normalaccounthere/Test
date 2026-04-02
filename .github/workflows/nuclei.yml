@@ -29,7 +29,7 @@ jobs:
 
       - name: Subdomain Enumeration
         run: |
-          DOMAIN=dpdgroup.co.uk
+          DOMAIN=bluedart.com
           
           echo "[+] Running subfinder"
           subfinder -d $DOMAIN -all -recursive -silent > subs_subfinder.txt
